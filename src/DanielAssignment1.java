@@ -35,7 +35,7 @@ public class DanielAssignment1 extends Application {
         // Image objects to store the image.
         ArrayList<Image> imageArray = new ArrayList<> ();
         for(int i = 0; i < 4; i++) {
-            imageArray.add(new Image("cow" + i + ".jpg",
+            imageArray.add(new Image("static/cow" + i + ".jpg",
                     300,
                     300,
                     false,
