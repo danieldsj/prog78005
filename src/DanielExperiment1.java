@@ -6,7 +6,7 @@ import javafx.stage.Stage;
 import javafx.scene.layout.StackPane;
 
 
-public class DanielExperiment extends Application {
+public class DanielExperiment1 extends Application {
 
     @Override
     public void start (Stage myStage) {
@@ -19,7 +19,7 @@ public class DanielExperiment extends Application {
         // Panes can be nested.
 
         // Create an image and an ImageView object (Node).
-        Image image = new Image("file:///home/daniel/Documents/src/prog78005/src/cow.jpg", 600,
+        Image image = new Image("cow.jpg", 600,
                 600, false, false);
         ImageView imageView = new ImageView();
         imageView.setImage(image);
