@@ -35,11 +35,22 @@ public class DanielAssignment1 extends Application {
         // Image objects to store the image.
         ArrayList<Image> imageArray = new ArrayList<> ();
         for(int i = 0; i < 4; i++) {
-            imageArray.add(new Image("static/cow" + i + ".jpg",
-                    300,
-                    300,
-                    false,
-                    false));
+            try {
+                imageArray.add(new Image("static/cow" + i + ".jpg",
+                        300,
+                        300,
+                        true,
+                        true));
+
+            } catch(IllegalArgumentException e) {
+                imageArray.add(new Image(
+                        "https://raw.githubusercontent.com/danieldsj/prog78005/master/src/static/cow" + i + ".jpg",
+                        200,
+                        200,
+                        true,
+                        true));
+            }
+
         }
 
         // The Image object musts be placed in ImageView objects.
@@ -67,6 +78,9 @@ public class DanielAssignment1 extends Application {
 
         // We need to set the Stage with the Scene containing the images.
         theStage.setScene(theScene);
+
+        // Give the window a friendly name.
+        theStage.setTitle("Daniel Assignment 1");
 
         // We need to show the stage.
         theStage.show();
