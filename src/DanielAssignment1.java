@@ -1,4 +1,5 @@
 /**
+ *
  * JavaFX Basics - Display Images
  * Written by Daniel de Sao Jose
  *
