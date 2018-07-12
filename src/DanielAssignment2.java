@@ -21,6 +21,7 @@ import javafx.scene.image.ImageView;
 import java.util.Random;
 import javafx.event.EventHandler;
 import javafx.event.ActionEvent;
+import java.util.ArrayList;
 
 
 public class DanielAssignment2 extends Application {
@@ -85,32 +86,36 @@ public class DanielAssignment2 extends Application {
         final String[] suits = {"clubs", "diamonds", "hearts", "spades"};
         final String[] values = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king", "ace"};
 
-        // Variables for the random numbers.
-        int randomSuitIndex;
-        int randomValueIndex;
+        // Generate a single list of cards to randomize over.
+        ArrayList<String> filenames = new ArrayList<>();
+        for (int suitIndex = 0; suitIndex < suits.length; suitIndex++) {
+            for (int valueIndex = 0; valueIndex < values.length; valueIndex++) {
+                filenames.add(values[valueIndex] + "_of_" + suits[suitIndex] + ".png");
+                // System.out.println(values[valueIndex] + "_of_" + suits[suitIndex] + ".png");
+            }
+        }
 
         // Variable for the filenames.
-        String filename;
+        String randomFilename;
+        String fullPath;
 
-        // Randomize 4 numbers and add the corresponding image file, to the grid.
+        // Randomize 4 numbers and add the correspon ding image file, to the grid.
         for(int i = 0; i < 4; i++) {
-            randomSuitIndex = random.nextInt(suits.length);
-            randomValueIndex = random.nextInt(values.length);
+            randomFilename = filenames.get(random.nextInt(filenames.size()));
 
             try {
 
                 // Attempt to get the file from the local "static" folder.
-                filename = "static/" + values[randomValueIndex] + "_of_" + suits[randomSuitIndex] + ".png";
-                grid.add(new ImageView(new Image(filename, 200, 200, true,
-                        true)), i, 0 );
+                fullPath = "stati/" + randomFilename;
+                grid.add(new ImageView(new Image(fullPath, 200, 200,
+                        true, true)), i, 0 );
 
             } catch(IllegalArgumentException e) {
 
                 // On exception, attempt ot get the file from the github repo.
-                filename = "https://raw.githubusercontent.com/danieldsj/prog78005/master/src/static/" +
-                        values[randomValueIndex] + "_of_" + suits[randomSuitIndex] + ".png";
-                grid.add(new ImageView(new Image(filename, 200, 200, true,
-                        true)), i, row );
+                fullPath = "https://raw.githubusercontent.com/danieldsj/prog78005/master/src/static/" + randomFilename;
+                grid.add(new ImageView(new Image(fullPath, 200, 200,
+                        true, true)), i, row );
             }
         }
     }
