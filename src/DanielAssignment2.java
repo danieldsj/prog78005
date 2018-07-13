@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 
 public class DanielAssignment2 extends Application {
+    private GridPane grid = new GridPane();
 
     /**
      * Since this is a subclass of a JavaFX Application, we must override the start method.
@@ -35,10 +36,10 @@ public class DanielAssignment2 extends Application {
     public void start (Stage stage) {
 
         // We need to create a GridPane object for the scene.
-        GridPane grid = new GridPane();
+        //GridPane grid = new GridPane();
 
-        // Populate row zero with images of random cards.
-        randomCardsOnGrid(grid, 0);
+        // Populate row with images of random cards.
+        handleRefresh();
 
         // Create a refresh button.
         Button button = new Button("Refresh");
@@ -47,12 +48,7 @@ public class DanielAssignment2 extends Application {
         grid.setHalignment(button, HPos.CENTER);
 
         // When clicked, the button should randomize cards again.
-        button.setOnAction((new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                randomCardsOnGrid(grid, 0);
-            }
-        }));
+        button.setOnAction( (e) -> handleRefresh() );  // Lambda for the win!
 
         // Add the button to the grid.
         grid.add(button, 0, 1, 4, 1);
@@ -71,13 +67,10 @@ public class DanielAssignment2 extends Application {
     }
 
     /**
-     * Given a GridPane object and an int representing a row number, populate that row with images of 4 random playing
-     * cards.
+     * Populate that row with images of 4 random playing cards.
      *
-     * @param grid The GridPane object where we will add images of 4 random playing cards.
-     * @param row The row on which the playing cards will be added to.
      */
-    public void randomCardsOnGrid(GridPane grid, int row) {
+    public void handleRefresh() {
 
         // Instance of random class to generate random numbers.
         Random random = new Random();
@@ -106,7 +99,7 @@ public class DanielAssignment2 extends Application {
             try {
 
                 // Attempt to get the file from the local "static" folder.
-                fullPath = "stati/" + randomFilename;
+                fullPath = "static/" + randomFilename;
                 grid.add(new ImageView(new Image(fullPath, 200, 200,
                         true, true)), i, 0 );
 
@@ -115,7 +108,7 @@ public class DanielAssignment2 extends Application {
                 // On exception, attempt ot get the file from the github repo.
                 fullPath = "https://raw.githubusercontent.com/danieldsj/prog78005/master/src/static/" + randomFilename;
                 grid.add(new ImageView(new Image(fullPath, 200, 200,
-                        true, true)), i, row );
+                        true, true)), i, 0 );
             }
         }
     }
