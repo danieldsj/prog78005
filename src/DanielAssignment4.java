@@ -105,7 +105,7 @@ public class DanielAssignment4 extends Application {
         btnPrevious.setOnAction(e -> previousHandler());
         btnUpdate.setOnAction(e -> updateHandler());
         tfName.setOnKeyTyped(e -> handleTextLimits(tfName, 32));
-        tfStreet.setOnKeyTyped(e -> handleTextLimits(tfStreet, 5));
+        tfStreet.setOnKeyTyped(e -> handleTextLimits(tfStreet, 32));
         tfCity.setOnKeyTyped(e -> handleTextLimits(tfCity, 20));
         tfState.setOnKeyTyped(e -> handleTextLimits(tfState, 2));
         tfZip.setOnKeyTyped(e -> handleTextLimits(tfZip, 5));
