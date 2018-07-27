@@ -49,7 +49,7 @@ public class DanielProject1 extends Application {
     @Override
     public void start(Stage stage) {
 
-        // Setup the UI.
+        // Mash up the UI nodes from the player classes to the application ui.
         pane.add(dealer.lblName, 0, 0, 1, 1);
         pane.add(dealer.boxHand, 0, 1, 1, 1);
         pane.add(player.lblName, 0, 2, 1, 1);
@@ -75,176 +75,262 @@ public class DanielProject1 extends Application {
         stage.setScene(scene);
         stage.setTitle("DanielProject1");
         stage.setWidth(800);
-        stage.setHeight(600);
+        stage.setResizable(false);
         stage.show();
     }
 
+    /**
+     * Handles events when clicking the draw button.
+     */
     public void drawHandler() {
-        player.draw(deck);
-        player.render();
-        player.getLblName().setText("Player (" + player.getPoints() + ")");
-        if(player.hasLost()) {
-            player.getLblName().setText("Player (" + player.getPoints() + ") LOSER!");
-            dealer.getLblName().setText("Dealer (" + dealer.getPoints() + ") WINNER!");
+        player.draw(deck);  // Player draws from the deck.
+        player.render(); // Update the UI to reflect the new hand.
+        player.updateLabelPoints(); // Update the labels to reflect the points.
+        if(player.isAbove21()) {
+            player.updateLabelLoser();
+            dealer.updateLabelWinner();
+
+            // Game is over,
+            btnHold.setDisable(true);
+            btnDraw.setDisable(true);
         }
     }
 
+    /**
+     * Handles events when clicking the hold button.
+     */
     public void holdHandler() {
-        while(dealer.getPoints() < 21 && dealer.getPoints() <= player.getPoints()) {
+
+        // Dealer draws if number is less than 17 and less than or equal to the players points.
+        while(dealer.getPoints() < 17 || dealer.getPoints() <= player.getPoints()) {
             dealer.draw(deck);
             dealer.render();
-            dealer.getLblName().setText("Dealer (" + dealer.getPoints() + ")");
-            if(dealer.hasLost()){
-                player.getLblName().setText("Player (" + player.getPoints() + ") WINNER!");
-                dealer.getLblName().setText("Dealer (" + dealer.getPoints() + ") LOSER!");
-            } else if (dealer.getPoints() > player.getPoints()){
-                player.getLblName().setText("Player (" + player.getPoints() + ") LOSER!");
-                dealer.getLblName().setText("Dealer (" + dealer.getPoints() + ") WINNER!");
-            } else if (dealer.getPoints() == 21) {
-                player.getLblName().setText("Player (" + player.getPoints() + ") LOSER!");
-                dealer.getLblName().setText("Dealer (" + dealer.getPoints() + ") WINNER!");
+            dealer.updateLabelPoints();
+
+            // Dealer loses if goes above 21.
+            if(dealer.isAbove21()){
+                dealer.updateLabelLoser();
+                player.updateLabelWinner();
+                break;
+            }
+            // Dealer wins if the number is greater than the players points.
+            else if (dealer.getPoints() > player.getPoints()){
+                player.updateLabelLoser();
+                dealer.updateLabelWinner();
+                break;
+            }
+            // Dealer wins ties.
+            else if (dealer.getPoints() == 21) {
+                player.updateLabelLoser();
+                dealer.updateLabelWinner();
+                break;
             }
         }
+
+        // Game is over,
+        btnHold.setDisable(true);
+        btnDraw.setDisable(true);
+
     }
 
     public static void main (String[] args) {
         launch(args);
     }
-}
 
+    /**
+     * This class is used to instantiate objects representing playing cards.
+     */
+    class Card {
 
-/**
- * This class is used to instantiate objects representing playing cards.
- */
-class Card {
+        // Fields
+        private String suit;
+        private String faceValue;
+        private String filename;
+        private int pointValue;
+        private Image imageFile;
+        private ImageView imageFileView;
 
-    // Fields
-    private String suit;
-    private String faceValue;
-    private String filename;
-    private int pointValue;
-    private Image imageFile;
-    private ImageView imageFileView;
+        // Constructors
+        Card(String suit, String faceValue) {
+            this.suit = suit.toLowerCase();
+            this.faceValue = faceValue.toLowerCase();
+            this.filename = faceValue + "_of_" + suit + ".png";
 
-    // Constructors
-    Card(String suit, String faceValue) {
-        this.suit = suit.toLowerCase();
-        this.faceValue = faceValue.toLowerCase();
-        this.filename = faceValue + "_of_" + suit + ".png";
-        imageFile = new Image("static/" + this.filename, 200, 200,
-                true, true);
-        imageFileView = new ImageView(imageFile);
+            // Attempt to get images from various sources.
+            try {
+                // Attempt to get the file from the local "static" folder.
+                this.imageFile = new Image("static/" + this.filename, 200, 200,
+                        true, true);
 
-        // Calculate the point value of the card.  Assume aces are worth 11 points at first.
-        switch(this.getFaceValue()) {
-            case "jack": this.setPointValue(10); break;
-            case "queen": this.setPointValue(10); break;
-            case "king": this.setPointValue(10); break;
-            case "ace": this.setPointValue(11); break;
-            default: this.setPointValue(Integer.valueOf(this.getFaceValue())); break;
-        }
-    }
+            } catch(IllegalArgumentException e) {
+                // On exception, attempt ot get the file from the github repo.
+                System.out.println("Could not find images in the 'static' folder, downloading from GitHub.");
+                String fullFilename = "https://raw.githubusercontent.com/danieldsj/prog78005/master/src/static/" +
+                        this.filename;
+                this.imageFile = new Image(fullFilename, 200, 200,
+                        true, true);
+            }
+            this.imageFileView = new ImageView(this.imageFile);
 
-    // Getter methods
-    public String getSuit() { return this.suit; }
-    public String getFaceValue() { return this.faceValue; }
-    public String getFilename() { return this.filename; }
-    public Image getImageFile() { return this.imageFile;}
-    public ImageView getImageFileView() { return this.imageFileView; }
-    public int getPointValue() { return this.pointValue; }
-
-    // Setter methods
-    public void setPointValue(int value) { this.pointValue = value; }
-}
-
-/**
- * This class is used to instantiate objects representing players or dealers.
- */
-class Player {
-
-    // Fields
-    ArrayList<Card> hand;
-    Random random;
-    HBox boxHand;
-    Label lblName;
-    String name;
-
-    // Constructors
-    Player(String name) {
-        this.hand = new ArrayList<>();
-        this.random = new Random();
-        this.boxHand = new HBox();
-        this.lblName = new Label(name);
-        this.boxHand.setMinHeight(200);
-        this.name = name;
-    }
-
-    // Getter methods
-    public HBox getBoxHand() { return this.boxHand; }
-    public Label getLblName() { return this.lblName; }
-    public ArrayList<Card> getHand() { return this.hand; }
-
-
-    // Methods
-    public void draw(ArrayList<Card> deck) {
-        int cardIndex = random.nextInt(deck.size() -1);
-        this.hand.add(deck.get(cardIndex));
-        deck.remove(cardIndex);
-    }
-
-    public void render() {
-        for (Card card : this.getHand()) {
-            if(!(this.getBoxHand().getChildren().contains(card.getImageFileView()))) {
-                this.getBoxHand().getChildren().add(card.getImageFileView());
+            // Calculate the point value of the card.  Assume aces are worth 11 points at first.
+            switch(this.getFaceValue()) {
+                case "jack": this.setPointValue(10); break;
+                case "queen": this.setPointValue(10); break;
+                case "king": this.setPointValue(10); break;
+                case "ace": this.setPointValue(11); break;
+                default: this.setPointValue(Integer.valueOf(this.getFaceValue())); break;
             }
         }
+
+        // Getter methods
+        public String getSuit() { return this.suit; }
+        public String getFaceValue() { return this.faceValue; }
+        public String getFilename() { return this.filename; }
+        public Image getImageFile() { return this.imageFile;}
+        public ImageView getImageFileView() { return this.imageFileView; }
+        public int getPointValue() { return this.pointValue; }
+
+        // Setter methods
+        public void setPointValue(int value) { this.pointValue = value; }
     }
 
-    public int getPoints() {
-        int result = 0;
-        for(Card e: this.hand) {
-            result += e.getPointValue();
+    /**
+     * This class is used to instantiate objects representing players or dealers.
+     */
+    class Player {
+
+        // Fields
+        ArrayList<Card> hand;
+        Random random;
+        HBox boxHand;
+        Label lblName;
+        String name;
+
+        // Constructors
+        Player(String name) {
+            this.hand = new ArrayList<>();
+            this.random = new Random();
+            this.boxHand = new HBox();
+            this.lblName = new Label(name);
+            this.boxHand.setMinHeight(200);
+            this.name = name;
         }
-        return result;
-    }
 
-    public Boolean hasAces() {
-        for(Card card: this.getHand()) {
-            if (card.getPointValue() == 11) {
-                return true;
+        // Getter methods
+        public HBox getBoxHand() { return this.boxHand; }
+        public Label getLblName() { return this.lblName; }
+        public ArrayList<Card> getHand() { return this.hand; }
+
+
+        // Methods
+
+        /**
+         * Given a deck, randomize an index value within the correct range.  Get that card and pace it in the Player
+         * object's hand.  Remove card from the deck.
+         *
+         * @param deck An ArrayList<Card> object from which we remove a random card.
+         */
+        public void draw(ArrayList<Card> deck) {
+            int cardIndex = random.nextInt(deck.size() -1);
+            this.hand.add(deck.get(cardIndex));
+            deck.remove(cardIndex);
+        }
+
+
+        /**
+         * Add an image of the Card to an HBox representing the players hand in the UI.
+         */
+        public void render() {
+            for (Card card : this.getHand()) {
+                if(!(this.getBoxHand().getChildren().contains(card.getImageFileView()))) {
+                    this.getBoxHand().getChildren().add(card.getImageFileView());
+                }
             }
         }
-        return false;
-    }
 
-    public Boolean hasLost() {
 
-        // If we are above 21.
-        if(this.getPoints() > 21){
+        /**
+         * Calculates the point values of the players hand.
+         *
+         * @return
+         */
+        public int getPoints() {
+            int result = 0;
+            for(Card e: this.hand) {
+                result += e.getPointValue();
+            }
+            return result;
+        }
 
-            // While we still have aces.
-            while(this.hasAces()) {
+        /**
+         * Returns true if the Player object has aces in it's hand.
+         *
+         * @return whether the player has aces in it's hand.
+         */
+        public Boolean hasAces() {
+            for(Card card: this.getHand()) {
+                if (card.getPointValue() == 11) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
-                // Iterate over each card.
-                for(Card card: this.getHand()) {
+        /**
+         * Update the Player object's label to include the amount of points it hads.
+         */
+        public void updateLabelPoints() {
+            this.getLblName().setText(this.name + " (" + this.getPoints() + ")");
+        }
 
-                    // If it's an ace.
-                    if(card.getPointValue() == 11) {
+        /**
+         * Update the Player object's label so that it indicates it has won.
+         */
+        public void updateLabelWinner() {
+            this.getLblName().setText(this.getLblName().getText() + " WINNER!");
+        }
 
-                        // Reduce it's value to 1.
-                        card.setPointValue(1);
-                        this.getLblName().setText(name + " (" + this.getPoints() + ")");
-                        break;
+        /**
+         * Update the Player object's label so that it indicates it has lost.
+         */
+        public void updateLabelLoser() {
+            this.getLblName().setText(this.getLblName().getText() + " LOSER!");
+        }
+
+        /**
+         * Determines whether the Player object has exceeded 21.
+         *
+         * @return Boolean representing whether the Player object has exceeded 21.
+         */
+        public Boolean isAbove21() {
+
+            // If we are above 21.
+            if(this.getPoints() > 21){
+
+                // While we still have aces.
+                while(this.hasAces()) {
+
+                    // Iterate over each card.
+                    for(Card card: this.getHand()) {
+
+                        // If it's an ace.
+                        if(card.getPointValue() == 11) {
+
+                            // Reduce it's value to 1.
+                            card.setPointValue(1);
+                            this.updateLabelPoints();
+                            break;
+                        }
+                    }
+
+                    // If it results in the number being less than or equal to 21, return false.
+                    if(this.getPoints() <= 21) {
+                        return false;
                     }
                 }
-
-                // If it results in the number being less than or equal to 21, return false.
-                if(this.getPoints() <= 21) {
-                    return false;
-                }
+                return true;
             }
-            return true;
+            return false;
         }
-        return false;
     }
 }
