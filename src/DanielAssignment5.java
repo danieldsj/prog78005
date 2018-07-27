@@ -1,10 +1,3 @@
-// Generic Classes
-// Exercise 19.9
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-
 /**
  * Generic Classes
  * Written by Daniel de Sao Jose
@@ -13,6 +6,10 @@ import java.util.Random;
  * public static <E extends Comparable<E>>
  * void sort(ArrayList<E> list)
  */
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
 public class DanielAssignment5 {
     public static void main(String[] args) {
